@@ -46,8 +46,9 @@
   .bh-session-time { font-size: 11px; color: #555; margin-top: 2px; }
   .bh-session-dur { font-size: 13px; color: #E8E8E8; font-variant-numeric: tabular-nums; }
   .bh-modal-back { position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 99; display: flex; align-items: flex-end; }
-  .bh-sheet { background: #141414; border-top-left-radius: 18px; border-top-right-radius: 18px; padding: 22px 18px 40px; width: 100%; max-width: 480px; margin: 0 auto; border-top: 0.5px solid #2A2A2A; }
-  .bh-sheet-title { font-size: 14px; color: #E8E8E8; font-weight: 500; margin-bottom: 14px; }
+  .bh-sheet { background: #141414; border-top-left-radius: 18px; border-top-right-radius: 18px; padding: 22px 18px 40px; width: 100%; max-width: 480px; margin: 0 auto; border-top: 0.5px solid #2A2A2A; max-height: 85vh; overflow-y: auto; }
+  .bh-sheet-title { font-size: 14px; color: #E8E8E8; font-weight: 500; margin-bottom: 4px; }
+  .bh-sheet-subtitle { font-size: 12px; color: #666; margin-bottom: 14px; }
   .bh-sheet-opt { display: flex; justify-content: space-between; align-items: center; padding: 13px 0; border-bottom: 0.5px solid #1F1F1F; cursor: pointer; }
   .bh-sheet-opt:last-child { border-bottom: none; }
   .bh-sheet-opt-text { font-size: 15px; color: #888; }
@@ -64,11 +65,12 @@
   .bh-stat-name { font-size: 10px; color: #666; margin-top: 3px; letter-spacing: 0.5px; text-transform: uppercase; }
   .bh-cal { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; }
   .bh-cal-head { font-size: 10px; color: #555; text-align: center; padding: 4px 0; letter-spacing: 0.8px; }
-  .bh-cal-day { aspect-ratio: 1; border-radius: 6px; background: #161616; display: flex; align-items: center; justify-content: center; font-size: 11px; color: #444; font-variant-numeric: tabular-nums; position: relative; }
+  .bh-cal-day { aspect-ratio: 1; border-radius: 6px; background: #161616; display: flex; align-items: center; justify-content: center; font-size: 11px; color: #444; font-variant-numeric: tabular-nums; position: relative; cursor: pointer; }
   .bh-cal-day.complete { background: #DC2626; color: #fff; font-weight: 500; }
   .bh-cal-day.partial { background: #3A1010; color: #888; }
   .bh-cal-day.today { box-shadow: inset 0 0 0 1px #E8E8E8; }
-  .bh-cal-day.future { background: transparent; color: #2A2A2A; }
+  .bh-cal-day.future { background: transparent; color: #2A2A2A; cursor: default; }
+  .bh-cal-day.empty { background: transparent; cursor: default; }
   .bh-cal-month { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
   .bh-cal-month-name { font-size: 14px; color: #E8E8E8; font-weight: 500; }
   .bh-cal-nav { display: flex; gap: 4px; }
@@ -82,6 +84,11 @@
   .bh-streak-label { font-size: 11px; color: #666; letter-spacing: 1.5px; text-transform: uppercase; margin-top: 6px; }
   .bh-streak-best { font-size: 11px; color: #888; margin-top: 10px; }
   .bh-reset-btn { background: transparent; border: 0.5px solid #2A2A2A; color: #888; font-size: 11px; padding: 8px 12px; border-radius: 8px; cursor: pointer; font-family: inherit; margin-top: 14px; }
+  .bh-day-task { display: flex; align-items: center; gap: 14px; padding: 12px 0; border-bottom: 0.5px solid #1F1F1F; cursor: pointer; }
+  .bh-day-task:last-child { border-bottom: none; }
+  .bh-day-task-label { flex: 1; font-size: 14px; color: #E8E8E8; }
+  .bh-day-task-label.done { color: #555; text-decoration: line-through; }
+  .bh-day-task-sub { font-size: 11px; color: #666; margin-top: 2px; }
 </style>
 </head>
 <body>
@@ -210,7 +217,7 @@
 (function() {
   const STORAGE_KEY = 'behaviors_v3';
   const CAT_KEY = 'behaviors_cats_v3';
-  const WORKOUTS = ['Push A', 'Pull A', 'Legs A', 'Push B', 'Pull B', 'Legs B'];
+  const WORKOUTS = ['Push A', 'Pull A', 'Legs A', 'Push B', 'Pull B', 'Legs B', 'Rest'];
   const DEFAULT_CATS = ['AI Mastery', 'Internship Work/Outreach', 'Technical Studying', 'Conceptual Studying'];
   let state = {};
   let categories = [];
@@ -232,7 +239,7 @@
     return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
   }
   function getDay(key) {
-    if (!state[key]) state[key] = { calories: false, protein: false, workout: null, focusSeconds: 0, sessions: [] };
+    if (!state[key]) state[key] = { calories: false, protein: false, workout: null, focusSeconds: 0, focusManualDone: false, sessions: [] };
     return state[key];
   }
   function countDone(day) {
@@ -240,7 +247,7 @@
     if (day.calories) c++;
     if (day.protein) c++;
     if (day.workout) c++;
-    if (day.focusSeconds >= 18000) c++;
+    if (day.focusSeconds >= 18000 || day.focusManualDone) c++;
     return c;
   }
   function isComplete(day) { return countDone(day) === 4; }
@@ -278,13 +285,13 @@
     setCircle('calories', day.calories);
     setCircle('protein', day.protein);
     setCircle('workout', !!day.workout);
-    setCircle('deepwork', day.focusSeconds >= 18000);
+    setCircle('deepwork', day.focusSeconds >= 18000 || day.focusManualDone);
     document.getElementById('bh-label-workout').textContent = day.workout || 'Log workout';
     document.getElementById('bh-sub-workout').textContent = day.workout ? 'Tap to change' : '6x/week progressive overload';
     document.getElementById('bh-label-workout').className = 'bh-label' + (day.workout ? ' done' : '');
     const hrs = Math.round((day.focusSeconds/3600)*10)/10;
     document.getElementById('bh-sub-deepwork').textContent = hrs + ' of 5 hours logged';
-    document.getElementById('bh-label-deepwork').className = 'bh-label' + (day.focusSeconds >= 18000 ? ' done' : '');
+    document.getElementById('bh-label-deepwork').className = 'bh-label' + ((day.focusSeconds >= 18000 || day.focusManualDone) ? ' done' : '');
     const streak = calcStreak();
     document.getElementById('bh-streak-header').textContent = streak.current;
     document.getElementById('bh-streak-big').textContent = streak.current;
@@ -372,8 +379,7 @@
     const todayK = todayKey();
     for (let i = 0; i < startDay; i++) {
       const blank = document.createElement('div');
-      blank.className = 'bh-cal-day';
-      blank.style.background = 'transparent';
+      blank.className = 'bh-cal-day empty';
       grid.appendChild(blank);
     }
     for (let d = 1; d <= daysInMonth; d++) {
@@ -381,15 +387,62 @@
       cell.className = 'bh-cal-day';
       const k = target.getFullYear()+'-'+String(target.getMonth()+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');
       const cellDate = new Date(target.getFullYear(), target.getMonth(), d);
-      if (cellDate > now && k !== todayK) cell.classList.add('future');
+      const isFuture = cellDate > now && k !== todayK;
+      if (isFuture) cell.classList.add('future');
       if (state[k]) {
         if (isComplete(state[k])) cell.classList.add('complete');
         else if (isPartial(state[k])) cell.classList.add('partial');
       }
       if (k === todayK) cell.classList.add('today');
       cell.textContent = d;
+      if (!isFuture) {
+        cell.onclick = () => openPastDaySheet(k);
+      }
       grid.appendChild(cell);
     }
+  }
+  function openPastDaySheet(dateKey) {
+    const day = getDay(dateKey);
+    const d = new Date(dateKey + 'T12:00:00');
+    const dateLabel = d.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
+    const back = document.createElement('div');
+    back.className = 'bh-modal-back';
+    const sheet = document.createElement('div');
+    sheet.className = 'bh-sheet';
+    const hrs = Math.round((day.focusSeconds/3600)*10)/10;
+    let html = '<div class="bh-sheet-title">'+dateLabel+'</div>';
+    html += '<div class="bh-sheet-subtitle">Tap to toggle. '+countDone(day)+' of 4 complete.</div>';
+    html += '<div class="bh-day-task" data-pdtoggle="calories"><div class="bh-circle'+(day.calories?' done':'')+'"><i class="ti ti-check"></i></div><div style="flex:1;"><div class="bh-day-task-label'+(day.calories?' done':'')+'">3,700 calorie surplus</div></div></div>';
+    html += '<div class="bh-day-task" data-pdtoggle="protein"><div class="bh-circle'+(day.protein?' done':'')+'"><i class="ti ti-check"></i></div><div style="flex:1;"><div class="bh-day-task-label'+(day.protein?' done':'')+'">180g protein</div></div></div>';
+    html += '<div class="bh-day-task" data-pdworkout><div class="bh-circle'+(day.workout?' done':'')+'"><i class="ti ti-check"></i></div><div style="flex:1;"><div class="bh-day-task-label'+(day.workout?' done':'')+'">'+(day.workout || 'Workout')+'</div><div class="bh-day-task-sub">Tap to set workout</div></div><i class="ti ti-chevron-right" style="color:#555;font-size:14px;"></i></div>';
+    const dwDone = day.focusSeconds >= 18000 || day.focusManualDone;
+    html += '<div class="bh-day-task" data-pdtoggle="focusManualDone"><div class="bh-circle'+(dwDone?' done':'')+'"><i class="ti ti-check"></i></div><div style="flex:1;"><div class="bh-day-task-label'+(dwDone?' done':'')+'">5 hours deep work</div><div class="bh-day-task-sub">'+hrs+'h logged'+(day.focusManualDone && day.focusSeconds < 18000 ? ' + manually marked' : '')+'</div></div></div>';
+    sheet.innerHTML = html;
+    back.appendChild(sheet);
+    document.body.appendChild(back);
+    sheet.querySelectorAll('[data-pdtoggle]').forEach(el => {
+      el.onclick = () => {
+        const key = el.dataset.pdtoggle;
+        day[key] = !day[key];
+        saveState();
+        document.body.removeChild(back);
+        render();
+        openPastDaySheet(dateKey);
+      };
+    });
+    const wkBtn = sheet.querySelector('[data-pdworkout]');
+    if (wkBtn) {
+      wkBtn.onclick = () => {
+        document.body.removeChild(back);
+        showSheet("Workout for " + dateLabel, WORKOUTS.map(w => ({ value: w, label: w, active: day.workout === w })), (v) => {
+          day.workout = (day.workout === v) ? null : v;
+          saveState();
+          render();
+          openPastDaySheet(dateKey);
+        });
+      };
+    }
+    back.onclick = e => { if (e.target === back) { document.body.removeChild(back); } };
   }
   function showSheet(title, options, onSelect, allowCustomAdd) {
     const back = document.createElement('div');
