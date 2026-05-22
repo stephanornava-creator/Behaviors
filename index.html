@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Behaviors">
+<meta name="theme-color" content="#0A0A0A">
+<title>Behaviors</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.47.0/tabler-icons.min.css">
+<style>
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin: 0; padding: 0; background: #0A0A0A; min-height: 100vh; min-height: -webkit-fill-available; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+  body { padding-top: env(safe-area-inset-top); padding-bottom: env(safe-area-inset-bottom); }
+  .bh-app { background: #0A0A0A; color: #E8E8E8; min-height: 100vh; padding: 20px 18px 80px; max-width: 480px; margin: 0 auto; }
+  .bh-date { font-size: 13px; color: #666; margin: 0; }
+  .bh-card { background: #141414; border: 0.5px solid #222; border-radius: 14px; padding: 16px; margin-bottom: 14px; }
+  .bh-section { font-size: 10px; color: #666; font-weight: 500; letter-spacing: 1.8px; margin: 18px 0 10px 2px; text-transform: uppercase; }
+  .bh-row { display: flex; align-items: center; gap: 14px; padding: 4px 0; cursor: pointer; }
+  .bh-circle { width: 24px; height: 24px; border-radius: 50%; border: 1.5px solid #2A2A2A; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all 0.15s; }
+  .bh-circle.done { background: #DC2626; border-color: #DC2626; }
+  .bh-circle.done i { color: #fff; font-size: 14px; }
+  .bh-circle i { color: transparent; }
+  .bh-label { font-size: 15px; color: #E8E8E8; font-weight: 400; }
+  .bh-label.done { color: #555; text-decoration: line-through; }
+  .bh-sub { font-size: 12px; color: #666; margin-top: 2px; }
+  .bh-stat-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+  .bh-stat-label { font-size: 12px; color: #666; }
+  .bh-stat-val { font-size: 12px; color: #E8E8E8; font-variant-numeric: tabular-nums; }
+  .bh-bar { height: 3px; background: #1F1F1F; border-radius: 2px; overflow: hidden; }
+  .bh-fill { height: 100%; background: #DC2626; transition: width 0.3s; }
+  .bh-tab-row { display: flex; background: #141414; border: 0.5px solid #222; border-radius: 12px; padding: 4px; margin-bottom: 18px; }
+  .bh-tab { flex: 1; padding: 9px 0; text-align: center; font-size: 12px; color: #666; font-weight: 500; border-radius: 9px; cursor: pointer; letter-spacing: 0.3px; }
+  .bh-tab.active { background: #1F1F1F; color: #E8E8E8; }
+  .bh-timer-disp { font-size: 54px; font-weight: 200; letter-spacing: -2px; text-align: center; font-variant-numeric: tabular-nums; color: #E8E8E8; margin: 10px 0 8px; }
+  .bh-timer-goal { font-size: 11px; color: #666; text-align: center; letter-spacing: 0.5px; margin-bottom: 18px; }
+  .bh-cat-pill { display: inline-flex; align-items: center; gap: 6px; background: #1A1A1A; border: 0.5px solid #2A2A2A; border-radius: 100px; padding: 8px 14px; font-size: 13px; color: #E8E8E8; cursor: pointer; margin: 0 auto 16px; }
+  .bh-cat-pill i { font-size: 14px; color: #666; }
+  .bh-btn-primary { width: 100%; background: #DC2626; color: #fff; border: none; border-radius: 12px; padding: 15px; font-size: 15px; font-weight: 500; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; font-family: inherit; }
+  .bh-btn-primary i { font-size: 18px; }
+  .bh-btn-secondary { width: 100%; background: #1A1A1A; color: #E8E8E8; border: 0.5px solid #2A2A2A; border-radius: 12px; padding: 15px; font-size: 15px; font-weight: 500; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; font-family: inherit; }
+  .bh-session { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 0.5px solid #1F1F1F; }
+  .bh-session:last-child { border-bottom: none; }
+  .bh-session-cat { font-size: 14px; color: #E8E8E8; }
+  .bh-session-time { font-size: 11px; color: #555; margin-top: 2px; }
+  .bh-session-dur { font-size: 13px; color: #E8E8E8; font-variant-numeric: tabular-nums; }
+  .bh-modal-back { position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 99; display: flex; align-items: flex-end; }
+  .bh-sheet { background: #141414; border-top-left-radius: 18px; border-top-right-radius: 18px; padding: 22px 18px 40px; width: 100%; max-width: 480px; margin: 0 auto; border-top: 0.5px solid #2A2A2A; }
+  .bh-sheet-title { font-size: 14px; color: #E8E8E8; font-weight: 500; margin-bottom: 14px; }
+  .bh-sheet-opt { display: flex; justify-content: space-between; align-items: center; padding: 13px 0; border-bottom: 0.5px solid #1F1F1F; cursor: pointer; }
+  .bh-sheet-opt:last-child { border-bottom: none; }
+  .bh-sheet-opt-text { font-size: 15px; color: #888; }
+  .bh-sheet-opt.active .bh-sheet-opt-text { color: #E8E8E8; }
+  .bh-sheet-opt.active i { color: #DC2626; font-size: 16px; }
+  .bh-sheet-opt i { color: transparent; font-size: 16px; }
+  .bh-cat-input-row { display: flex; gap: 8px; align-items: center; margin-top: 14px; }
+  .bh-cat-input { flex: 1; background: #1A1A1A; border: 0.5px solid #2A2A2A; border-radius: 10px; padding: 11px 13px; color: #E8E8E8; font-size: 14px; font-family: inherit; }
+  .bh-cat-input:focus { outline: none; border-color: #444; }
+  .bh-add-btn { background: #DC2626; border: none; border-radius: 10px; width: 38px; height: 38px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #fff; }
+  .bh-stat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 18px; }
+  .bh-stat-card { background: #141414; border: 0.5px solid #222; border-radius: 12px; padding: 14px 8px; text-align: center; }
+  .bh-stat-num { font-size: 26px; font-weight: 500; color: #E8E8E8; font-variant-numeric: tabular-nums; }
+  .bh-stat-name { font-size: 10px; color: #666; margin-top: 3px; letter-spacing: 0.5px; text-transform: uppercase; }
+  .bh-cal { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; }
+  .bh-cal-head { font-size: 10px; color: #555; text-align: center; padding: 4px 0; letter-spacing: 0.8px; }
+  .bh-cal-day { aspect-ratio: 1; border-radius: 6px; background: #161616; display: flex; align-items: center; justify-content: center; font-size: 11px; color: #444; font-variant-numeric: tabular-nums; position: relative; }
+  .bh-cal-day.complete { background: #DC2626; color: #fff; font-weight: 500; }
+  .bh-cal-day.partial { background: #3A1010; color: #888; }
+  .bh-cal-day.today { box-shadow: inset 0 0 0 1px #E8E8E8; }
+  .bh-cal-day.future { background: transparent; color: #2A2A2A; }
+  .bh-cal-month { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
+  .bh-cal-month-name { font-size: 14px; color: #E8E8E8; font-weight: 500; }
+  .bh-cal-nav { display: flex; gap: 4px; }
+  .bh-cal-nav-btn { background: #1A1A1A; border: 0.5px solid #2A2A2A; border-radius: 8px; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; color: #888; cursor: pointer; }
+  .bh-banner { background: rgba(220, 38, 38, 0.12); border: 0.5px solid rgba(220, 38, 38, 0.4); border-radius: 12px; padding: 12px 14px; margin-bottom: 14px; display: flex; gap: 10px; align-items: flex-start; }
+  .bh-banner i { color: #DC2626; font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+  .bh-banner-title { font-size: 13px; color: #E8E8E8; font-weight: 500; }
+  .bh-banner-sub { font-size: 12px; color: #888; margin-top: 2px; }
+  .bh-streak-block { background: #141414; border: 0.5px solid #222; border-radius: 14px; padding: 22px 16px; text-align: center; margin-bottom: 14px; }
+  .bh-streak-num { font-size: 56px; font-weight: 200; color: #DC2626; line-height: 1; letter-spacing: -2px; font-variant-numeric: tabular-nums; }
+  .bh-streak-label { font-size: 11px; color: #666; letter-spacing: 1.5px; text-transform: uppercase; margin-top: 6px; }
+  .bh-streak-best { font-size: 11px; color: #888; margin-top: 10px; }
+  .bh-reset-btn { background: transparent; border: 0.5px solid #2A2A2A; color: #888; font-size: 11px; padding: 8px 12px; border-radius: 8px; cursor: pointer; font-family: inherit; margin-top: 14px; }
+</style>
+</head>
+<body>
+<div class="bh-app" id="bh-app">
+  <div id="bh-shell">
+    <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 18px;">
+      <div><p class="bh-date" id="bh-date">Loading...</p></div>
+      <div style="text-align: right;">
+        <div style="font-size: 22px; font-weight: 200; color: #DC2626; font-variant-numeric: tabular-nums;" id="bh-streak-header">0</div>
+        <div style="font-size: 9px; color: #666; letter-spacing: 1.2px; text-transform: uppercase;">day streak</div>
+      </div>
+    </div>
+    <div class="bh-tab-row" id="bh-tab-row">
+      <div class="bh-tab active" data-tab="today">Today</div>
+      <div class="bh-tab" data-tab="focus">Focus</div>
+      <div class="bh-tab" data-tab="history">History</div>
+    </div>
+    <div id="bh-banner-slot"></div>
+    <div id="bh-view-today">
+      <div class="bh-card">
+        <div class="bh-stat-row">
+          <span class="bh-stat-label">Today's progress</span>
+          <span class="bh-stat-val" id="bh-progress-count">0 of 4</span>
+        </div>
+        <div class="bh-bar"><div class="bh-fill" id="bh-progress-fill" style="width: 0%;"></div></div>
+      </div>
+      <div class="bh-section">Nutrition</div>
+      <div class="bh-card">
+        <div class="bh-row" data-toggle="calories">
+          <div class="bh-circle" id="bh-circle-calories"><i class="ti ti-check"></i></div>
+          <div style="flex: 1;">
+            <div class="bh-label" id="bh-label-calories">3,700 calorie surplus</div>
+            <div class="bh-sub">Daily target</div>
+          </div>
+        </div>
+        <div style="height: 1px; background: #1F1F1F; margin: 14px 0;"></div>
+        <div class="bh-row" data-toggle="protein">
+          <div class="bh-circle" id="bh-circle-protein"><i class="ti ti-check"></i></div>
+          <div style="flex: 1;">
+            <div class="bh-label" id="bh-label-protein">180g protein</div>
+            <div class="bh-sub">Daily target</div>
+          </div>
+        </div>
+      </div>
+      <div class="bh-section">Training</div>
+      <div class="bh-card bh-row" id="bh-workout-row" style="cursor: pointer;">
+        <div class="bh-circle" id="bh-circle-workout"><i class="ti ti-check"></i></div>
+        <div style="flex: 1;">
+          <div class="bh-label" id="bh-label-workout">Log workout</div>
+          <div class="bh-sub" id="bh-sub-workout">6x/week progressive overload</div>
+        </div>
+        <i class="ti ti-chevron-right" style="color: #555; font-size: 16px;"></i>
+      </div>
+      <div class="bh-section">Deep Work</div>
+      <div class="bh-card bh-row" id="bh-deepwork-row" style="cursor: pointer;">
+        <div class="bh-circle" id="bh-circle-deepwork"><i class="ti ti-check"></i></div>
+        <div style="flex: 1;">
+          <div class="bh-label" id="bh-label-deepwork">5 hours focused work</div>
+          <div class="bh-sub" id="bh-sub-deepwork">Tap Focus tab to run timer</div>
+        </div>
+        <i class="ti ti-chevron-right" style="color: #555; font-size: 16px;"></i>
+      </div>
+    </div>
+    <div id="bh-view-focus" style="display: none;">
+      <div class="bh-card" style="display: flex; flex-direction: column; align-items: center;">
+        <div class="bh-timer-disp" id="bh-timer-disp">00:00:00</div>
+        <div class="bh-timer-goal">Daily goal: 5 hours</div>
+        <div style="display: flex; align-items: center; gap: 10px; width: 100%; margin-bottom: 16px;">
+          <div class="bh-bar" style="flex: 1;"><div class="bh-fill" id="bh-focus-fill" style="width: 0%;"></div></div>
+          <span style="font-size: 11px; color: #555; width: 32px; text-align: right; font-variant-numeric: tabular-nums;" id="bh-focus-pct">0%</span>
+        </div>
+        <div class="bh-cat-pill" id="bh-cat-pill">
+          <span id="bh-cat-text">Select category</span>
+          <i class="ti ti-chevron-down"></i>
+        </div>
+        <button class="bh-btn-primary" id="bh-timer-btn"><i class="ti ti-player-play"></i><span id="bh-timer-btn-text">Start</span></button>
+      </div>
+      <div class="bh-section" id="bh-sessions-label" style="display: none;">Today's sessions</div>
+      <div class="bh-card" id="bh-sessions-card" style="display: none;">
+        <div id="bh-sessions-list"></div>
+      </div>
+    </div>
+    <div id="bh-view-history" style="display: none;">
+      <div class="bh-streak-block">
+        <div class="bh-streak-num" id="bh-streak-big">0</div>
+        <div class="bh-streak-label">Current streak</div>
+        <div class="bh-streak-best" id="bh-streak-best">Best: 0 days</div>
+      </div>
+      <div class="bh-stat-grid">
+        <div class="bh-stat-card">
+          <div class="bh-stat-num" id="bh-total-complete">0</div>
+          <div class="bh-stat-name">Complete</div>
+        </div>
+        <div class="bh-stat-card">
+          <div class="bh-stat-num" id="bh-total-partial">0</div>
+          <div class="bh-stat-name">Partial</div>
+        </div>
+        <div class="bh-stat-card">
+          <div class="bh-stat-num" id="bh-total-rate">0%</div>
+          <div class="bh-stat-name">30-day</div>
+        </div>
+      </div>
+      <div class="bh-card">
+        <div class="bh-cal-month">
+          <div class="bh-cal-month-name" id="bh-cal-month-name">May 2026</div>
+          <div class="bh-cal-nav">
+            <div class="bh-cal-nav-btn" id="bh-cal-prev"><i class="ti ti-chevron-left" style="font-size: 14px;"></i></div>
+            <div class="bh-cal-nav-btn" id="bh-cal-next"><i class="ti ti-chevron-right" style="font-size: 14px;"></i></div>
+          </div>
+        </div>
+        <div class="bh-cal">
+          <div class="bh-cal-head">M</div><div class="bh-cal-head">T</div><div class="bh-cal-head">W</div><div class="bh-cal-head">T</div><div class="bh-cal-head">F</div><div class="bh-cal-head">S</div><div class="bh-cal-head">S</div>
+        </div>
+        <div class="bh-cal" id="bh-cal-grid" style="margin-top: 6px;"></div>
+        <div style="display: flex; gap: 16px; margin-top: 16px; padding-top: 14px; border-top: 0.5px solid #1F1F1F;">
+          <div style="display: flex; align-items: center; gap: 6px;"><div style="width: 10px; height: 10px; background: #DC2626; border-radius: 3px;"></div><span style="font-size: 10px; color: #888;">All 4 done</span></div>
+          <div style="display: flex; align-items: center; gap: 6px;"><div style="width: 10px; height: 10px; background: #3A1010; border-radius: 3px;"></div><span style="font-size: 10px; color: #888;">Partial</span></div>
+          <div style="display: flex; align-items: center; gap: 6px;"><div style="width: 10px; height: 10px; background: #161616; border-radius: 3px;"></div><span style="font-size: 10px; color: #888;">Missed</span></div>
+        </div>
+      </div>
+      <button class="bh-reset-btn" id="bh-reset-btn">Reset all data</button>
+    </div>
+  </div>
+</div>
+<script>
+(function() {
+  const STORAGE_KEY = 'behaviors_v3';
+  const CAT_KEY = 'behaviors_cats_v3';
+  const WORKOUTS = ['Push A', 'Pull A', 'Legs A', 'Push B', 'Pull B', 'Legs B'];
+  const DEFAULT_CATS = ['AI Mastery', 'Internship Work/Outreach', 'Technical Studying', 'Conceptual Studying'];
+  let state = {};
+  let categories = [];
+  let timerRunning = false;
+  let timerInterval = null;
+  let timerStartMs = null;
+  let timerCategory = null;
+  let calOffset = 0;
+
+  function load() {
+    try { state = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}'); } catch(e) { state = {}; }
+    try { categories = JSON.parse(localStorage.getItem(CAT_KEY) || 'null') || DEFAULT_CATS.slice(); } catch(e) { categories = DEFAULT_CATS.slice(); }
+  }
+  function saveState() { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
+  function saveCats() { localStorage.setItem(CAT_KEY, JSON.stringify(categories)); }
+
+  function todayKey() {
+    const d = new Date();
+    return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+  }
+  function getDay(key) {
+    if (!state[key]) state[key] = { calories: false, protein: false, workout: null, focusSeconds: 0, sessions: [] };
+    return state[key];
+  }
+  function countDone(day) {
+    let c = 0;
+    if (day.calories) c++;
+    if (day.protein) c++;
+    if (day.workout) c++;
+    if (day.focusSeconds >= 18000) c++;
+    return c;
+  }
+  function isComplete(day) { return countDone(day) === 4; }
+  function isPartial(day) { const c = countDone(day); return c > 0 && c < 4; }
+  function fmtTime(s) {
+    const h = Math.floor(s/3600);
+    const m = Math.floor((s%3600)/60);
+    const ss = s%60;
+    return String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+':'+String(ss).padStart(2,'0');
+  }
+  function calcStreak() {
+    const allKeys = Object.keys(state).sort();
+    let best = 0, run = 0;
+    for (const k of allKeys) {
+      if (isComplete(state[k])) { run++; if (run > best) best = run; }
+      else { run = 0; }
+    }
+    let d = new Date(), s = 0;
+    while (true) {
+      const k = d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+      if (state[k] && isComplete(state[k])) { s++; }
+      else if (k === todayKey()) {}
+      else { break; }
+      d.setDate(d.getDate()-1);
+    }
+    return { current: s, best: Math.max(best, s) };
+  }
+  function render() {
+    const day = getDay(todayKey());
+    const dateNow = new Date();
+    document.getElementById('bh-date').textContent = dateNow.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
+    const done = countDone(day);
+    document.getElementById('bh-progress-count').textContent = done + ' of 4';
+    document.getElementById('bh-progress-fill').style.width = Math.round((done/4)*100) + '%';
+    setCircle('calories', day.calories);
+    setCircle('protein', day.protein);
+    setCircle('workout', !!day.workout);
+    setCircle('deepwork', day.focusSeconds >= 18000);
+    document.getElementById('bh-label-workout').textContent = day.workout || 'Log workout';
+    document.getElementById('bh-sub-workout').textContent = day.workout ? 'Tap to change' : '6x/week progressive overload';
+    document.getElementById('bh-label-workout').className = 'bh-label' + (day.workout ? ' done' : '');
+    const hrs = Math.round((day.focusSeconds/3600)*10)/10;
+    document.getElementById('bh-sub-deepwork').textContent = hrs + ' of 5 hours logged';
+    document.getElementById('bh-label-deepwork').className = 'bh-label' + (day.focusSeconds >= 18000 ? ' done' : '');
+    const streak = calcStreak();
+    document.getElementById('bh-streak-header').textContent = streak.current;
+    document.getElementById('bh-streak-big').textContent = streak.current;
+    document.getElementById('bh-streak-best').textContent = 'Best: ' + streak.best + ' day' + (streak.best === 1 ? '' : 's');
+    let totalComplete = 0, totalPartial = 0, last30 = 0;
+    for (const k of Object.keys(state)) {
+      if (isComplete(state[k])) totalComplete++;
+      else if (isPartial(state[k])) totalPartial++;
+    }
+    const now = new Date();
+    for (let i = 0; i < 30; i++) {
+      const d = new Date(now);
+      d.setDate(d.getDate() - i);
+      const k = d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+      if (state[k] && isComplete(state[k])) last30++;
+    }
+    document.getElementById('bh-total-complete').textContent = totalComplete;
+    document.getElementById('bh-total-partial').textContent = totalPartial;
+    document.getElementById('bh-total-rate').textContent = Math.round((last30/30)*100) + '%';
+    renderCalendar();
+    renderTimer();
+    renderBanner();
+  }
+  function setCircle(key, on) {
+    const el = document.getElementById('bh-circle-' + key);
+    const lbl = document.getElementById('bh-label-' + key);
+    if (!el) return;
+    if (on) { el.classList.add('done'); if (lbl) lbl.classList.add('done'); }
+    else { el.classList.remove('done'); if (lbl) lbl.classList.remove('done'); }
+  }
+  function renderBanner() {
+    const slot = document.getElementById('bh-banner-slot');
+    slot.innerHTML = '';
+    const day = getDay(todayKey());
+    const done = countDone(day);
+    if (done < 4) {
+      const remaining = 4 - done;
+      slot.innerHTML = '<div class="bh-banner"><i class="ti ti-alert-circle"></i><div><div class="bh-banner-title">' + remaining + ' task' + (remaining===1?'':'s') + ' remaining</div><div class="bh-banner-sub">Streak resets at midnight if incomplete</div></div></div>';
+    }
+  }
+  function renderTimer() {
+    const day = getDay(todayKey());
+    let display = day.focusSeconds;
+    if (timerRunning && timerStartMs) display = day.focusSeconds + Math.floor((Date.now()-timerStartMs)/1000);
+    document.getElementById('bh-timer-disp').textContent = fmtTime(display);
+    const pct = Math.min(100, Math.round((display/18000)*100));
+    document.getElementById('bh-focus-fill').style.width = pct + '%';
+    document.getElementById('bh-focus-pct').textContent = pct + '%';
+    document.getElementById('bh-cat-text').textContent = timerCategory || 'Select category';
+    const btn = document.getElementById('bh-timer-btn');
+    if (timerRunning) {
+      btn.innerHTML = '<i class="ti ti-player-stop"></i><span>Stop session</span>';
+      btn.className = 'bh-btn-secondary';
+    } else {
+      btn.innerHTML = '<i class="ti ti-player-play"></i><span>Start</span>';
+      btn.className = 'bh-btn-primary';
+    }
+    const sessionsCard = document.getElementById('bh-sessions-card');
+    const sessionsLabel = document.getElementById('bh-sessions-label');
+    if (day.sessions && day.sessions.length > 0) {
+      sessionsCard.style.display = 'block';
+      sessionsLabel.style.display = 'block';
+      const list = document.getElementById('bh-sessions-list');
+      list.innerHTML = '';
+      day.sessions.slice().reverse().forEach(s => {
+        const div = document.createElement('div');
+        div.className = 'bh-session';
+        div.innerHTML = '<div><div class="bh-session-cat">'+s.category+'</div><div class="bh-session-time">'+s.time+'</div></div><div class="bh-session-dur">'+fmtTime(s.duration)+'</div>';
+        list.appendChild(div);
+      });
+    } else {
+      sessionsCard.style.display = 'none';
+      sessionsLabel.style.display = 'none';
+    }
+  }
+  function renderCalendar() {
+    const grid = document.getElementById('bh-cal-grid');
+    grid.innerHTML = '';
+    const now = new Date();
+    const target = new Date(now.getFullYear(), now.getMonth() + calOffset, 1);
+    document.getElementById('bh-cal-month-name').textContent = target.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+    const monthStart = new Date(target.getFullYear(), target.getMonth(), 1);
+    const startDay = (monthStart.getDay() + 6) % 7;
+    const daysInMonth = new Date(target.getFullYear(), target.getMonth() + 1, 0).getDate();
+    const todayK = todayKey();
+    for (let i = 0; i < startDay; i++) {
+      const blank = document.createElement('div');
+      blank.className = 'bh-cal-day';
+      blank.style.background = 'transparent';
+      grid.appendChild(blank);
+    }
+    for (let d = 1; d <= daysInMonth; d++) {
+      const cell = document.createElement('div');
+      cell.className = 'bh-cal-day';
+      const k = target.getFullYear()+'-'+String(target.getMonth()+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');
+      const cellDate = new Date(target.getFullYear(), target.getMonth(), d);
+      if (cellDate > now && k !== todayK) cell.classList.add('future');
+      if (state[k]) {
+        if (isComplete(state[k])) cell.classList.add('complete');
+        else if (isPartial(state[k])) cell.classList.add('partial');
+      }
+      if (k === todayK) cell.classList.add('today');
+      cell.textContent = d;
+      grid.appendChild(cell);
+    }
+  }
+  function showSheet(title, options, onSelect, allowCustomAdd) {
+    const back = document.createElement('div');
+    back.className = 'bh-modal-back';
+    const sheet = document.createElement('div');
+    sheet.className = 'bh-sheet';
+    let html = '<div class="bh-sheet-title">'+title+'</div>';
+    options.forEach(o => {
+      html += '<div class="bh-sheet-opt'+(o.active?' active':'')+'" data-val="'+o.value.replace(/"/g,'&quot;')+'"><span class="bh-sheet-opt-text">'+o.label+'</span><i class="ti ti-check"></i></div>';
+    });
+    if (allowCustomAdd) {
+      html += '<div class="bh-cat-input-row"><input type="text" class="bh-cat-input" placeholder="Add new category..." id="bh-new-cat-input"><button class="bh-add-btn" id="bh-add-cat-btn"><i class="ti ti-plus"></i></button></div>';
+    }
+    sheet.innerHTML = html;
+    back.appendChild(sheet);
+    document.body.appendChild(back);
+    options.forEach(o => {
+      const el = sheet.querySelector('[data-val="'+o.value.replace(/"/g,'&quot;')+'"]');
+      if (el) el.onclick = () => { onSelect(o.value); document.body.removeChild(back); };
+    });
+    if (allowCustomAdd) {
+      const input = document.getElementById('bh-new-cat-input');
+      const addBtn = document.getElementById('bh-add-cat-btn');
+      const add = () => {
+        const v = input.value.trim();
+        if (!v) return;
+        categories.push(v);
+        saveCats();
+        document.body.removeChild(back);
+        openCategorySheet();
+      };
+      addBtn.onclick = add;
+      input.onkeydown = e => { if (e.key === 'Enter') add(); };
+    }
+    back.onclick = e => { if (e.target === back) document.body.removeChild(back); };
+  }
+  function openWorkoutSheet() {
+    const day = getDay(todayKey());
+    const opts = WORKOUTS.map(w => ({ value: w, label: w, active: day.workout === w }));
+    showSheet("Today's workout", opts, (v) => {
+      const d = getDay(todayKey());
+      d.workout = (d.workout === v) ? null : v;
+      saveState();
+      render();
+    });
+  }
+  function openCategorySheet() {
+    const opts = categories.map(c => ({ value: c, label: c, active: timerCategory === c }));
+    showSheet('Task category', opts, (v) => {
+      timerCategory = v;
+      render();
+    }, true);
+  }
+  function switchTab(name) {
+    document.querySelectorAll('.bh-tab').forEach(t => t.classList.toggle('active', t.dataset.tab === name));
+    document.getElementById('bh-view-today').style.display = name === 'today' ? 'block' : 'none';
+    document.getElementById('bh-view-focus').style.display = name === 'focus' ? 'block' : 'none';
+    document.getElementById('bh-view-history').style.display = name === 'history' ? 'block' : 'none';
+  }
+  load();
+  render();
+  document.querySelectorAll('.bh-tab').forEach(t => { t.onclick = () => switchTab(t.dataset.tab); });
+  document.querySelectorAll('[data-toggle]').forEach(el => {
+    el.onclick = () => {
+      const key = el.dataset.toggle;
+      const d = getDay(todayKey());
+      d[key] = !d[key];
+      saveState();
+      render();
+    };
+  });
+  document.getElementById('bh-workout-row').onclick = openWorkoutSheet;
+  document.getElementById('bh-deepwork-row').onclick = () => switchTab('focus');
+  document.getElementById('bh-cat-pill').onclick = openCategorySheet;
+  document.getElementById('bh-timer-btn').onclick = () => {
+    if (!timerRunning) {
+      if (!timerCategory) { openCategorySheet(); return; }
+      timerRunning = true;
+      timerStartMs = Date.now();
+      timerInterval = setInterval(() => renderTimer(), 1000);
+    } else {
+      const elapsed = Math.floor((Date.now() - timerStartMs) / 1000);
+      clearInterval(timerInterval);
+      timerRunning = false;
+      const d = getDay(todayKey());
+      d.focusSeconds += elapsed;
+      d.sessions = d.sessions || [];
+      d.sessions.push({ category: timerCategory, duration: elapsed, time: new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }) });
+      timerStartMs = null;
+      saveState();
+      render();
+    }
+  };
+  document.getElementById('bh-cal-prev').onclick = () => { calOffset--; renderCalendar(); };
+  document.getElementById('bh-cal-next').onclick = () => { calOffset++; renderCalendar(); };
+  document.getElementById('bh-reset-btn').onclick = () => {
+    if (confirm('Delete all tracked data? This cannot be undone.')) {
+      state = {};
+      saveState();
+      render();
+    }
+  };
+})();
+</script>
+</body>
+</html>
